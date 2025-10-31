@@ -1,7 +1,7 @@
 import pandas as pd
 import torch
 
-def load_node_csv(path, index_col, encoders = None, **kwargs):
+def load_node_csv(path, index_col, x_encoders = None, y_encoders = None, **kwargs):
 	"""
 	Loads and encodes the node features from a .csv file into a tensor format
 	for efficient parallelisation in PyTorch.
@@ -9,7 +9,8 @@ def load_node_csv(path, index_col, encoders = None, **kwargs):
 	Parameters:
 		path: path to the csv file
 		index_col: the column of the index to use
-		encoders: a dictionary mapping column labels in the csv to an appropriate encoder
+		x_encoders: a dictionary mapping feature column labels in the csv to an appropriate encoder
+		y_encoders: a dictionaty mapping ground truth column labels to an appropriate encoder
 		**kwargs: keyword arguments to pass to the csv reader
 	
 	Returns a tuple of the encoded node data as a tensor, and a mapping from row indexes in the csv
@@ -20,15 +21,21 @@ def load_node_csv(path, index_col, encoders = None, **kwargs):
 
 	mapping = {index : i for i, index in enumerate(df.index)}
 
-	# Encode the data into a tensor
-	nodes = None
-	if encoders is not None:
-		xs = [encoder(df[col]) for col, encoder in encoders.items()]
+	# Encode the feature data into a tensor
+	node_xs = None
+	if x_encoders is not None:
+		xs = [encoder(df[col]) for col, encoder in x_encoders.items()]
 
 		# Concatenate the encoded values to produce a tensor for use in PyTorch
-		nodes = torch.cat(xs, dim = -1)
-	
-	return nodes, mapping
+		node_xs = torch.cat(xs, dim = -1)
+
+	node_ys = None
+	if y_encoders is not None:
+		ys = [encoder(df[col]) for col, encoder in y_encoders.items()]
+
+		node_ys = torch.cat(ys, dim = -1)
+
+	return node_xs, node_ys, mapping
 
 def load_edge_csv(path, index_col, src_col, dst_col, row_mapping, encoders = None, directed = True,
 		**kwargs):
@@ -56,11 +63,12 @@ def load_edge_csv(path, index_col, src_col, dst_col, row_mapping, encoders = Non
 	# Apply row mapping so edge indexes match up with the correct row in the node tensor
 	processed_edges = df.get([src_col, dst_col]).map(lambda x: row_mapping[x]).to_numpy()
 
-	edges = torch.tensor(processed_edges)
+	# Reshape edges to be correctly interpreted
+	edges = torch.tensor(processed_edges).t().contiguous()
 
 	if not directed:
-		rev_edges = torch.tensor(processed_edges.copy()[:-1])
-		edges = torch.cat((edges, rev_edges), 0)
+		rev_edges = edges.flip([0])
+		edges = torch.cat((edges, rev_edges), -1)
 	
 	# Encode the feature data into a tensor
 	edge_features = None
