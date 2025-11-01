@@ -4,6 +4,8 @@ from torch_geometric.transforms import RandomNodeSplit
 import pandas as pd
 import src.csv_loading as csv_loading
 import src.encoders as encoders
+import src.model as gcn
+import src.visualise as vis
 
 def extract_csv_data(root, device = None, num_val = 0.1, num_test = 0.2):
 	"""
@@ -59,11 +61,27 @@ if __name__ == '__main__':
 	# Setup device
 	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 	
-	data = extract_csv_data(".")
+	data = extract_csv_data(".", num_test = 0.5)
 	
 	print(data.num_nodes,
           data.num_edges,
           data.num_features,
+          data.y.size(),
           sum(data.y),
           sep = "|"
 	)
+
+	model = gcn.GCN(data, 150)
+	optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, weight_decay = 5e-4)
+	criterion = torch.nn.CrossEntropyLoss()
+
+	print(data.edge_index)
+	
+	for epoch in range(0, 100):
+		loss = gcn.train_epoch(model, criterion, optimizer, data)
+		print(f"Epoch {epoch}: loss = {loss:.4f}")
+
+	test_acc = gcn.test_model(model, data)
+	print(f"Test Accuracy: {test_acc:.4f}")
+
+	vis.tsne_plot(model(data.x, data.edge_index), true_colour = data.y.argmax(dim = -1))

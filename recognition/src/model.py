@@ -30,7 +30,7 @@ class GCN(torch.nn.Module):
 		x = self.conv1(x, edge_index)
 		x = x.relu()
 		x = tnf.dropout(x, p = 0.5, training = self.training)
-		x = self.conv2(x)
+		x = self.conv2(x, edge_index)
 		return x
 
 def train_epoch(model, criterion, optimizer, data):
@@ -47,7 +47,7 @@ def train_epoch(model, criterion, optimizer, data):
 	"""
 	model.train()
 	optimizer.zero_grad()
-	out = model(data.x)
+	out = model(data.x, data.edge_index)
 	loss = criterion(out[data.train_mask], data.y[data.train_mask])
 	loss.backward()
 	optimizer.step()
@@ -64,7 +64,8 @@ def test_model(model, data):
 	Returns the accuracy of the test.
 	"""
 	model.eval()
-	out = model(data.x).argmax(dim = -1)
-	test_correct = torch.eq(out[data.test_mask], data.y[data.test_mask])
-	test_acc = int(test_correct).sum() / int(data.test_mask).sum()
+	out = model(data.x, data.edge_index).argmax(dim = -1).reshape((-1, 1)).eq(torch.tensor([[0, 1, 2, 3]]))
+	test_correct = torch.mul(out[data.test_mask], data.y[data.test_mask])
+	test_acc = test_correct.sum() / data.test_mask.sum()
+	print(test_correct.sum(), data.test_mask.sum(), test_acc, sep = "|")
 	return test_acc
