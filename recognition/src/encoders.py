@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 from sentence_transformers import SentenceTransformer
 
 class NameEncoder():
@@ -24,7 +25,9 @@ class NameEncoder():
 
 		Returns the encoding of the dataframe.
 		"""
-		x = self._model.encode(df.to_numpy(), show_progress_bar = True, convert_to_tensor = True,
+		x = self._model.encode(df.to_numpy(),
+                               show_progress_bar = True,
+                               convert_to_tensor = True,
 							   device = self._device)
 		# Return the encoded data to the cpu
 		return x.cpu()
@@ -48,9 +51,6 @@ class PageEncoder():
 
 		Returns the encoding of the dataframe.
 		"""
-		matches = df.transform(
-			[lambda x: x == category for category in self._categories],
-			axis = 0
-		).to_numpy()
-		
+		matches = np.equal(df.to_numpy().reshape((-1, 1)), np.array([self._categories]))
+
 		return torch.tensor(matches, dtype = torch.float64)
