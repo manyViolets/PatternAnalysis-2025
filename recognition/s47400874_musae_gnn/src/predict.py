@@ -47,5 +47,5 @@ if __name__ == "__main__":
 
 	
 	plot = tsne_plot(model(data.x, data.edge_index), true_colour = data.y.argmax(dim = -1))
-	plot.show()
 	plot.savefig(PLOT_SAVE_PATH)
+	plot.show()
