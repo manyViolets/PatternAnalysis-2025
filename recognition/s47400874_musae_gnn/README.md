@@ -23,6 +23,6 @@ Download the MUSAE dataset to this directory and unzip it (alternatively, if you
 
 Using the provided scripts, a consistent accuracy of around 95% was achieved on test data for the MUSAE dataset.
 
-For one such model (with an accuracy of 94.64%), a TSNE plot is provided (with legend \[0: government, 1: company, 2: tvshow, 3: politician\]:
+For one such model (with an accuracy of 94.64%), a TSNE plot is provided (with legend \[0: government, 1: company, 2: tvshow, 3: politician\]):
 ![TSNE Plot](./assets/tsne_plot.png)
-From this plot, the separation of the dataset into four distinct regions is clear, although there is some overlap between.
+From this plot, the model clearly separates the nodes by colour quite consistently. Notably however, there is some minor overlap between politician (grey) and government (green), and between tvshow (red) and company (yellow). This succinctly demonstrates both the success of the model in classifying the nodes, and some areas for further improvements.
