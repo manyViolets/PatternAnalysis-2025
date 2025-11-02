@@ -6,6 +6,7 @@ import modules
 from dataset import load_csv_data, DATA_PATH
 from train import NUM_HIDDEN_CHANNELS, SAVE_PATH
 
+PLOT_SAVE_PATH = "../assets/tsne_plot.png"
 
 def tsne_plot(prediction, true_colour):
 	"""
@@ -19,8 +20,8 @@ def tsne_plot(prediction, true_colour):
 	z = TSNE(n_components = 2, verbose = 1, perplexity = 30).fit_transform(prediction.detach().cpu().numpy())
 	
 	plt.scatter(z[:,0], z[:, 1], c = true_colour, cmap = "Accent", alpha = 0.1)
-	plt.show()
-	return None
+	plt.title("TSNE Plot of Model Predictions with Ground Truth Values Shown")
+	return plt
 
 def load_gcn_model(num_features, num_categories, path):
 	"""
@@ -34,13 +35,17 @@ def load_gcn_model(num_features, num_categories, path):
 	model = modules.GCN(num_features, num_categories, NUM_HIDDEN_CHANNELS)
 	model.load_state_dict(torch.load(SAVE_PATH, weights_only = True))
 	model.eval()
-
+	return model
 
 if __name__ == "__main__":
 	# Load data
 	data = load_csv_data(DATA_PATH)
 
 	# Load the model
-	load_gcn_model(data.num_features,  data.y.size()[1], SAVE_PATH)
+	model = load_gcn_model(data.num_features,  data.y.size()[1], SAVE_PATH)
 
 	
+	plot = tsne_plot(model(data.x, data.edge_index), true_colour = data.y.argmax(dim = -1))
+
+	plot.show()
+	plt.savefig(PLOT_SAVE_PATH)
