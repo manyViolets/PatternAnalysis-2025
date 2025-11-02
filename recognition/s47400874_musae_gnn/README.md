@@ -9,5 +9,13 @@ Download the MUSAE dataset to this directory and unzip it (alternatively, if you
 
 ## Dependencies
 
+`torch` | Version 2.8.0
+`torch-geometric` | Version 2.7.0
+`sentence-transformers` | Version 5.1.2
+`numpy` | Version 2.3.2
+`pandas` | Version 2.3.1
+`matplotlib` | Version 3.10.5
+`scikit-learn` | Version 1.7.2
+
 ## Example of Trained Model
 
