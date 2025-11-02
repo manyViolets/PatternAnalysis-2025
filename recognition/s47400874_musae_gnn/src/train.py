@@ -1,6 +1,7 @@
 import torch
 from modules import GCN
 from dataset import load_csv_data, DATA_PATH
+from torch_geometric.transforms import RandomNodeSplit
 
 NUM_HIDDEN_CHANNELS = 150
 NUM_EPOCHS = 100
@@ -57,8 +58,12 @@ if __name__ == "__main__":
 	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 	# Extract data
-	data = load_csv_data(DATA_PATH, num_test = 0.3)
-
+	csv_data = load_csv_data(DATA_PATH)
+	
+	# Split into training, validation and testing nodes
+	transform = RandomNodeSplit(num_val = 0.1, num_test = 0.5)
+	data = transform(csv_data)
+	
 	# Set up model, optimizer and criterion
 	model = GCN(data.num_features, data.y.size()[1], NUM_HIDDEN_CHANNELS)
 	optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, weight_decay = 5e-4)

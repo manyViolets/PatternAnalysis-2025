@@ -3,7 +3,6 @@ import torch
 import encoders
 
 from torch_geometric.data import Data
-from torch_geometric.transforms import RandomNodeSplit
 
 DATA_PATH = ".."
 DATA_SAVE_PATH = "../out/dataset"
@@ -102,6 +101,11 @@ def load_csv_data(root, device = None, num_val = 0.1, num_test = 0.2):
 
 	Returns the preprocessed dataset for feeding to PyTorch
 	"""
+	try:
+		data = torch.load(DATA_SAVE_PATH, weights_only = False)
+		return data
+	except FileNotFoundError:
+		print("Preprocessing Data:") 
 	
 	# Create encoders
 	name_encoder = encoders.NameEncoder(
@@ -132,13 +136,5 @@ def load_csv_data(root, device = None, num_val = 0.1, num_test = 0.2):
 	# Create dataset
 	data = Data(x = node_xs, edge_index = edges, y = node_ys)
 
-	# Split into training, validation and testing nodes
-	transform = RandomNodeSplit(num_val = num_val, num_test = num_test)
-	
-	return transform(data)
-
-
-def save_preprocessed_data(data, path):
-	"""
-	"""
-	torch.save(data, path)
+	torch.save(data, DATA_SAVE_PATH)
+	return data
