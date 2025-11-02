@@ -19,8 +19,9 @@ def tsne_plot(prediction, true_colour):
 	"""
 	z = TSNE(n_components = 2, verbose = 1, perplexity = 30).fit_transform(prediction.detach().cpu().numpy())
 	
-	plt.scatter(z[:,0], z[:, 1], c = true_colour, cmap = "Accent", alpha = 0.1)
+	plt.scatter(z[:,0], z[:, 1], c = true_colour, cmap = "Accent")
 	plt.title("TSNE Plot of Model Predictions with Ground Truth Values Shown")
+	plt.colorbar()
 	return plt
 
 def load_gcn_model(num_features, num_categories, path):
@@ -46,6 +47,5 @@ if __name__ == "__main__":
 
 	
 	plot = tsne_plot(model(data.x, data.edge_index), true_colour = data.y.argmax(dim = -1))
-
 	plot.show()
-	plt.savefig(PLOT_SAVE_PATH)
+	plot.savefig(PLOT_SAVE_PATH)
