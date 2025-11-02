@@ -18,3 +18,11 @@ Download the MUSAE dataset to this directory and unzip it (alternatively, if you
 `pandas` Version 2.3.1 |
 `matplotlib` Version 3.10.5 |
 `scikit-learn` Version 1.7.2
+
+## Example of Trained Model
+
+Using the provided scripts, a consistent accuracy of around 95% was achieved on test data for the MUSAE dataset.
+
+For one such model (with an accuracy of 94.64%), a TSNE plot is provided (with legend \[0: government, 1: company, 2: tvshow, 3: politician\]:
+![TSNE Plot](./assets/tsne_plot.png)
+From this plot, the separation of the dataset into four distinct regions is clear, although there is some overlap between.
