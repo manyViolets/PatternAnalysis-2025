@@ -27,7 +27,7 @@ def train_epoch(model, criterion, optimizer, data):
 	optimizer.step()
 	return loss
 
-def test_model(model, data):
+def test_model(model, data, device = None):
 	"""
 	Tests a trained model against a dataset.
 
@@ -38,7 +38,7 @@ def test_model(model, data):
 	Returns the accuracy of the test.
 	"""
 	model.eval()
-	out = model(data.x, data.edge_index).argmax(dim = -1).reshape((-1, 1)).eq(torch.tensor([[0, 1, 2, 3]]))
+	out = model(data.x, data.edge_index).argmax(dim = -1).reshape((-1, 1)).eq(torch.tensor([[0, 1, 2, 3]], device = device))
 	test_correct = torch.mul(out[data.test_mask], data.y[data.test_mask])
 	test_acc = test_correct.sum() / data.test_mask.sum()
 	return test_acc
@@ -69,13 +69,16 @@ if __name__ == "__main__":
 	optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, weight_decay = 5e-4)
 	criterion = torch.nn.CrossEntropyLoss()
 
+	data.to(device)
+	model.to(device)
+
 	# Train model
 	for epoch in range(0, NUM_EPOCHS):
 		loss = train_epoch(model, criterion, optimizer, data)
 		print(f"Epoch {epoch}: loss = {loss:.4f}")
 
 	# Test model
-	test_acc = test_model(model, data)
+	test_acc = test_model(model, data, device)
 	print(f"Test Accuracy: {test_acc:.4f}")
 
 	# Save model

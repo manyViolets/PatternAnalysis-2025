@@ -6,7 +6,7 @@ class GCN(torch.nn.Module):
 	"""
     A graph convolutional network layer.
 	"""
-	def __init__(self, num_features, num_categories, hidden_channels):
+	def __init__(self, num_features, num_categories, hidden_channels, device = None):
 		"""
 		Parameters:
 			num_features: the number of node and edge features of the dataset
@@ -17,6 +17,7 @@ class GCN(torch.nn.Module):
 		super().__init__()
 		self.conv1 = GCNConv(num_features, hidden_channels)
 		self.conv2 = GCNConv(hidden_channels, num_categories)
+		self.device = device
 		
 
 	def forward(self, x, edge_index):
